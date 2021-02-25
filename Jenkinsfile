@@ -1,6 +1,12 @@
 #!/usr/bin/env groovy
 
 node {
+    environment {
+      APP_NAME = "jhipstersampleapp"
+      BRANCH_NAME = "master"
+      DOCKER_IMAGE_TAG = "$APP_NAME:R${env.BUILD_ID}"
+    }
+    
     stage('checkout') {
         checkout scm
     }
@@ -52,8 +58,8 @@ node {
 
     def dockerImage
     stage('publish docker') {
-        // A pre-requisite to this step is to setup authentication to the docker registry
-        // https://github.com/GoogleContainerTools/jib/tree/master/jib-maven-plugin#authentication-methods
-        sh "./mvnw -ntp jib:build"
+        withCredentials([usernamePassword(credentialsId: 'myregistry-login', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
+            sh "./mvnw -ntp jib:build -Dimage=$DOCKER_IMAGE_TAG"        
+        }
     }
 }
