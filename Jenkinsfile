@@ -40,7 +40,7 @@ node {
             sh "echo ${USERNAME} ${PASSWORD} ${DOCKER_IMAGE_TAG}"
             sh "docker login -u ${USERNAME} -p ${PASSWORD}"
             sh "./mvnw -ntp jib:build -Dimage=$DOCKER_IMAGE_TAG"
-            sh "docker push ${DOCKER_IMAGE_TAG}"
+            sh "docker push ${USERNAME}/${DOCKER_IMAGE_TAG}"
         }
     }
 }
