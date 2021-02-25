@@ -1,10 +1,9 @@
-#!/usr/bin/env groovy
+pipeline {
 
-node {
     environment {
       APP_NAME = "jhipstersampleapp"
       BRANCH_NAME = "master"
-      DOCKER_IMAGE_TAG = "$APP_NAME:R${env.BUILD_ID}"
+      DOCKER_IMAGE_TAG = "$APP_NAME"
     }
     
     stage('checkout') {
@@ -31,14 +30,11 @@ node {
         sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
     }
 
-
-
     stage('packaging') {
         sh "./mvnw -ntp verify -P-webpack -Pprod -DskipTests"
         archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
     }
 
-    def dockerImage
     stage('publish docker') {
         withCredentials([usernamePassword(credentialsId: 'myregistry-login', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')]) {
             sh "docker login -u ${USERNAME} -p ${PASSWORD}"
